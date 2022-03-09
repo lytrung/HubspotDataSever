@@ -84,6 +84,42 @@ router.post('/companies', (req, res) => {
   
 })
 
+router.put('/companies', (req, res) => {
+
+    var url = 'https://api.hubapi.com/companies/v1/batch-async/update?'+hapikeyParam
+    var data = req.body.batchData
+
+
+    var batchData = data.map(e=>{
+
+        var company_id = e.company_id
+        delete e.company_id
+        return {
+            objectId: company_id,
+            properties:  Object.keys(e).map(key => {return {name:key, value : e[key]}}) 
+        }
+    })
+
+    var batches = _.chunk(batchData,100) //API size limit is 100 for each batch
+
+    // for(var i=0;i<batches.length;i++){
+    //     var batch = batches[i]
+    //     await axios.post(url,batchData)
+    //         .then(response=>console.log(response.data))
+    //         .catch(error => console.log(error))
+    // }
+    var updateRequests = batches.map( batch=>{
+        return axios.post(url,batch)
+            .then(response=>console.log(response.data))
+            .catch(error => console.log(error))
+    })
+
+    Promise.all(updateRequests).then(()=>res.json('all updated'))
+
+    // res.json('all updated')
+  
+})
+
 router.put('/companies/:id', (req, res) => {
 
 
@@ -101,6 +137,8 @@ router.put('/companies/:id', (req, res) => {
         .then(response=>res.json(response.data.companyId))
   
 })
+
+
 
 //add companies association
 router.put('/associations', (req, res) => {
