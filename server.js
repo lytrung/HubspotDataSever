@@ -84,6 +84,24 @@ router.post('/companies', (req, res) => {
   
 })
 
+router.put('/companies/:id', (req, res) => {
+
+
+    var url = 'https://api.hubapi.com/companies/v2/companies/'+req.params.id+'?'+hapikeyParam
+    var data = req.body
+
+    var propertiesData = Object.keys(data).map(key => {return {name:key, value : data[key]}}) //converting data
+    
+    var properties = { 
+        properties: propertiesData
+
+    }
+    console.log(url)
+    axios.put(url,properties)
+        .then(response=>res.json(response.data.companyId))
+  
+})
+
 //add companies association
 router.put('/associations', (req, res) => {
 
