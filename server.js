@@ -81,9 +81,11 @@ router.post('/companies', (req, res) => {
 
     axios.post(url,properties)
         .then(response=>res.json(response.data.companyId))
+        .catch(error=>res.json('exceeding limits, perhaps'))
   
 })
 
+//batch update multiple companies
 router.put('/companies', (req, res) => {
 
     var url = 'https://api.hubapi.com/companies/v1/batch-async/update?'+hapikeyParam
@@ -101,22 +103,15 @@ router.put('/companies', (req, res) => {
     })
 
     var batches = _.chunk(batchData,100) //API size limit is 100 for each batch
-
-    // for(var i=0;i<batches.length;i++){
-    //     var batch = batches[i]
-    //     await axios.post(url,batchData)
-    //         .then(response=>console.log(response.data))
-    //         .catch(error => console.log(error))
-    // }
     var updateRequests = batches.map( batch=>{
         return axios.post(url,batch)
             .then(response=>console.log(response.data))
             .catch(error => console.log(error))
     })
 
-    Promise.all(updateRequests).then(()=>res.json('all updated'))
-
-    // res.json('all updated')
+    Promise.all(updateRequests)
+            .then(()=>res.json('all updated'))
+            .catch(error=>res.json('exceeding limits, perhaps'))
   
 })
 
@@ -135,6 +130,7 @@ router.put('/companies/:id', (req, res) => {
     console.log(url)
     axios.put(url,properties)
         .then(response=>res.json(response.data.companyId))
+        .catch(error=>res.json('exceeding limits, perhaps'))
   
 })
 
@@ -148,6 +144,7 @@ router.put('/associations', (req, res) => {
 
     axios.put(url,data)
         .then(response=>res.json(response.data.companyId))
+        .catch(error=>res.json('exceeding limits, perhaps'))
 
 })
 
